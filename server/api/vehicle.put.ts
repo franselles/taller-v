@@ -7,8 +7,8 @@ export default eventHandler(async (event) => {
 
   try {
     const updateData: any = {
-      model: body.model,
-      plate: body.plate,
+      model: body.model.toUpperCase(),
+      plate: body.plate.toUpperCase(),
       itv_date: new Date(body.itv_date),
       next_itv_date: new Date(body.next_itv_date),
       oil_km: Number(body.oil_km),

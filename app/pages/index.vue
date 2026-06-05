@@ -33,7 +33,7 @@ const handleLogin = async () => {
                 <h3
                     class="card-title text-2xl font-bold justify-center mb-2 text-primary"
                 >
-                    v 0.0.1 en desarrollo
+                    v 0.0.2 en desarrollo
                 </h3>
                 <p class="text-sm text-base-content/70 text-center mb-4">
                     Introduce tus credenciales para acceder a la plataforma.

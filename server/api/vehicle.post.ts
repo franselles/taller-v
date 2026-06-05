@@ -6,8 +6,8 @@ export default eventHandler(async (event) => {
   try {
     const newVehicle = await prisma.vehicles.create({
       data: {
-        model: response.model || "",
-        plate: response.plate || "",
+        model: response.model.toUpperCase() || "",
+        plate: response.plate.toUpperCase() || "",
         km: Number(response.km) || 0,
         itv_date: new Date(response.itv_date) || null,
         next_itv_date: new Date(response.next_itv_date) || null,

@@ -284,10 +284,7 @@ const handleSubmit = async () => {
                 </div>
 
                 <div class="card-actions justify-end mt-4 gap-2">
-                    <NuxtLink
-                        to="/dash/vehiculos"
-                        class="btn btn-ghost"
-                        :disabled="loading"
+                    <NuxtLink to="/dash/vehicles" class="btn btn-ghost"
                         >Cancelar</NuxtLink
                     >
                     <button
