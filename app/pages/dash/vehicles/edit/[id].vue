@@ -64,7 +64,7 @@ const handleSubmit = async () => {
     statusMessage.value = null;
 
     try {
-        await $fetch(`/api/vehicles`, {
+        await $fetch(`/api/vehicle`, {
             // Tu endpoint PUT que acepta el cuerpo de actualización
             method: "PUT",
             body: {
@@ -87,7 +87,7 @@ const handleSubmit = async () => {
 
         // Redirigir de vuelta a la lista tras 1.5 segundos
         setTimeout(() => {
-            navigateTo("/dash/vehiculos");
+            navigateTo("/dash/vehicles");
         }, 1500);
     } catch (error: any) {
         console.error("Error al actualizar:", error);

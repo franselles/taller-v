@@ -27,7 +27,7 @@ const handleSubmit = async () => {
 
     try {
         // Petición al endpoint que acabas de definir
-        await $fetch("/api/vehiculos", {
+        await $fetch("/api/vehicle", {
             // Ajusta la URL exacta de tu endpoint si cambia
             method: "POST",
             body: {
@@ -61,7 +61,7 @@ const handleSubmit = async () => {
 
         // Opcional: Redirigir a la lista de vehículos tras 2 segundos
         setTimeout(() => {
-            navigateTo("/dash/vehiculos");
+            navigateTo("/dash/vehicles");
         }, 2000);
     } catch (error: any) {
         statusMessage.value = {
@@ -179,7 +179,6 @@ const handleSubmit = async () => {
                                 placeholder="0"
                                 class="input input-bordered w-full"
                                 min="0"
-                                required
                                 :disabled="loading"
                             />
                         </div>
