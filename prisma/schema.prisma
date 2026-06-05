@@ -1,0 +1,44 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Users {
+  id     Int     @id @default(autoincrement())
+  name   String? @db.VarChar(100)
+  code   String? @db.VarChar(4)
+  active Boolean @default(true)
+}
+
+model Vehicles {
+  id            Int       @id @default(autoincrement())
+  model         String?   @db.VarChar(300)
+  plate         String?   @db.VarChar(10)
+  km            Int?
+  itv_date      DateTime? @db.Date
+  next_itv_date DateTime? @db.Date
+  oil_km        Int?
+  next_oil_km   Int?
+  active        Boolean   @default(true)
+  reports       Reports[]
+}
+
+model Reports {
+  id          Int       @id @default(autoincrement())
+  date_report DateTime? @db.Date
+  km          Int?
+  fault       String?   @db.Text
+  repair      String?   @db.Text
+  active      Boolean   @default(true)
+  vehicle_id  Int?
+  vehicle     Vehicles? @relation(fields: [vehicle_id], references: [id])
+}

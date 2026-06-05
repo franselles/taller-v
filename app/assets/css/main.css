@@ -1,0 +1,6 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+.menu li a.active {
+    @apply bg-primary text-primary-content font-medium;
+}

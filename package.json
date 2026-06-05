@@ -1,0 +1,29 @@
+{
+  "name": "taller-v",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "Sistema en tiempo real para el control de mantenimiento y partes de averías",
+  "author": "franselles",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@prisma/adapter-mariadb": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "@tailwindcss/vite": "^4.3.0",
+    "daisyui": "^5.5.20",
+    "nuxt": "^4.4.5",
+    "tailwindcss": "^4.3.0",
+    "vue": "^3.5.33",
+    "vue-router": "^5.0.6"
+  },
+  "devDependencies": {
+    "@nuxt/icon": "^2.2.3",
+    "prisma": "^7.8.0"
+  }
+}
