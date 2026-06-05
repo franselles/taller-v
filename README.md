@@ -1,4 +1,4 @@
-# CuentaHamacas V — Módulo de Gestión de Flota y Taller
+# Taller V — Módulo de Gestión de Flota y Taller
 
 Sistema en tiempo real para el control de mantenimiento y partes de averías de la flota de vehículos y maquinaria pesada de **RA Benidorm**. Este módulo digitaliza el flujo de trabajo del taller mecánico, permitiendo sustituir las hojas de papel por un registro síncrono de incidencias.
 
