@@ -71,6 +71,9 @@ watch(
 
 // 3. Guardar los cambios mediante una petición PUT usando $fetch bajo demanda
 const handleSubmit = async () => {
+    // 🛡️ GUARDIÁN ANTIDOBLE-ENVÍO: Si ya se está procesando la petición, abortamos inmediatamente
+    if (saving.value) return;
+
     saving.value = true;
     statusMessage.value = null;
 
@@ -106,9 +109,11 @@ const handleSubmit = async () => {
                 error.statusMessage ||
                 "No se pudieron salvar las modificaciones del informe.",
         };
-    } finally {
+        // ⚠️ Solo reactivamos el botón si la petición falla, para que puedan corregir y reintentar
         saving.value = false;
     }
+    // Nota: Omitimos deliberadamente 'saving.value = false' si la petición es exitosa.
+    // Al mantenerlo a true, evitamos que un usuario impaciente clique de nuevo mientras dura el setTimeout.
 };
 </script>
 
@@ -132,6 +137,7 @@ const handleSubmit = async () => {
             <NuxtLink
                 to="/dash/reports"
                 class="btn btn-ghost btn-sm gap-2 self-start sm:self-auto"
+                :class="{ 'btn-disabled': saving }"
             >
                 <Icon name="lucide:arrow-left" class="w-4 h-4" />
                 Volver al listado
@@ -361,13 +367,18 @@ const handleSubmit = async () => {
                 </div>
 
                 <div class="card-actions justify-end mt-4 gap-2">
-                    <NuxtLink to="/dash/reports" class="btn btn-ghost"
-                        >Cancelar</NuxtLink
+                    <NuxtLink
+                        to="/dash/reports"
+                        class="btn btn-ghost"
+                        :class="{ 'btn-disabled': saving }"
                     >
+                        Cancelar
+                    </NuxtLink>
                     <button
                         type="submit"
                         class="btn btn-primary px-8"
                         :disabled="saving"
+                        :class="{ 'btn-disabled': saving }"
                     >
                         <span
                             v-if="saving"

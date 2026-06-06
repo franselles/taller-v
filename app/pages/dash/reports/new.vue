@@ -22,8 +22,8 @@ const form = ref({
     vehicle_id: "" as number | string,
     km: null as number | null,
     fault: "",
-    repair: "", // Puede empezar vacío ya que a veces solo se reporta el fallo
-    active: true, // El parte empieza abierto por defecto
+    repair: "",
+    active: true,
 });
 
 const saving = ref(false);
@@ -48,6 +48,9 @@ watch(
 
 // 3. Enviar el nuevo informe al servidor (POST)
 const handleSubmit = async () => {
+    // 🛡️ GUARDIÁN ANTIDOBLE-SUBMIT: Si ya está guardando, salimos inmediatamente sin hacer nada
+    if (saving.value) return;
+
     if (!form.value.vehicle_id) {
         statusMessage.value = {
             type: "error",
@@ -56,11 +59,12 @@ const handleSubmit = async () => {
         return;
     }
 
+    // Activamos el estado de carga inmediatamente
     saving.value = true;
     statusMessage.value = null;
 
     try {
-        // ✨ Capturamos la respuesta del servidor (que contiene el ID recién creado)
+        // ✨ Capturamos la respuesta del servidor
         const newReportResult = await $fetch<any>("/api/report", {
             method: "POST",
             body: {
@@ -81,7 +85,7 @@ const handleSubmit = async () => {
             text: `Parte guardado con éxito. SE HA ASIGNADO EL NÚMERO DE PARTE: #${newReportResult.id}`,
         };
 
-        // Le damos un poco más de tiempo (3 segundos) para que pueda copiarlo en el papel antes de cambiar de página
+        // Le damos un poco más de tiempo (3 segundos) para copiarlo antes de redirigir
         setTimeout(() => {
             navigateTo("/dash/reports");
         }, 3000);
@@ -93,9 +97,12 @@ const handleSubmit = async () => {
                 error.statusMessage ||
                 "Hubo un problema al guardar el informe.",
         };
-    } finally {
+        // ⚠️ Solo volvemos a permitir el envío si la petición ha fallado con un error
         saving.value = false;
     }
+    // Nota: El `saving.value = false` se ha quitado del bloque `finally` a propósito.
+    // Si la inserción es correcta, dejamos la pantalla bloqueada permanentemente en modo "Guardando..."
+    // mientras dura la cuenta atrás de la redirección automática.
 };
 </script>
 
@@ -113,7 +120,11 @@ const handleSubmit = async () => {
                     una reparación.
                 </p>
             </div>
-            <NuxtLink to="/dash/reports" class="btn btn-ghost btn-sm gap-2">
+            <NuxtLink
+                to="/dash/reports"
+                class="btn btn-ghost btn-sm gap-2"
+                :class="{ 'btn-disabled': saving }"
+            >
                 <Icon name="lucide:arrow-left" class="w-4 h-4" />
                 Volver al listado
             </NuxtLink>
@@ -217,9 +228,10 @@ const handleSubmit = async () => {
                             <label class="label">
                                 <span
                                     class="label-text-alt text-base-content/50"
-                                    >Se autocompleta con el último kilometraje
-                                    registrado del vehículo.</span
                                 >
+                                    Se autocompleta con el último kilometraje
+                                    registrado del vehículo.
+                                </span>
                             </label>
                         </div>
                     </div>
@@ -243,7 +255,7 @@ const handleSubmit = async () => {
                             <textarea
                                 v-model="form.fault"
                                 rows="4"
-                                placeholder="Describe detalladamente qué le pasa al vehículo (Ej: Pérdida de potencia, ruido extraño en el eje delantero, testigo de aceite encendido...)"
+                                placeholder="Describe detalladamente qué le pasa al vehículo..."
                                 class="textarea textarea-bordered w-full text-base"
                                 required
                                 :disabled="saving"
@@ -262,7 +274,7 @@ const handleSubmit = async () => {
                             <textarea
                                 v-model="form.repair"
                                 rows="4"
-                                placeholder="Si ya se ha solucionado, detalla qué piezas se han cambiado o qué reparación se ha llevado a cabo..."
+                                placeholder="Si ya se ha solucionado, detalla qué piezas se han cambiado..."
                                 class="textarea textarea-bordered w-full text-base"
                                 :disabled="saving"
                             ></textarea>
@@ -286,11 +298,13 @@ const handleSubmit = async () => {
                     </div>
                     <div class="form-control">
                         <label class="label cursor-pointer gap-3">
-                            <span class="label-text font-medium">{{
-                                form.active
-                                    ? "🛠️ Abierto (En Taller)"
-                                    : "✅ Cerrado (Reparado)"
-                            }}</span>
+                            <span class="label-text font-medium">
+                                {{
+                                    form.active
+                                        ? "🛠️ Abierto (En Taller)"
+                                        : "✅ Cerrado (Reparado)"
+                                }}
+                            </span>
                             <input
                                 v-model="form.active"
                                 type="checkbox"
@@ -301,14 +315,22 @@ const handleSubmit = async () => {
                     </div>
                 </div>
 
+                <!-- BOTONERA -->
                 <div class="card-actions justify-end mt-4 gap-2">
-                    <NuxtLink to="/dash/reports" class="btn btn-ghost"
-                        >Cancelar</NuxtLink
+                    <NuxtLink
+                        to="/dash/reports"
+                        class="btn btn-ghost"
+                        :class="{ 'btn-disabled': saving }"
                     >
+                        Cancelar
+                    </NuxtLink>
+
+                    <!-- ARREGLADO: Se añade la clase condicional 'btn-disabled' junto al atributo :disabled -->
                     <button
                         type="submit"
                         class="btn btn-primary px-8"
                         :disabled="saving"
+                        :class="{ 'btn-disabled': saving }"
                     >
                         <span
                             v-if="saving"

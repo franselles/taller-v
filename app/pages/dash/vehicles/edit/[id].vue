@@ -26,7 +26,6 @@ const statusMessage = ref<{ type: "success" | "error"; text: string } | null>(
 );
 
 // 2. Cargar los datos actuales del vehículo usando useFetch al montar la página
-// Asume un endpoint GET en /api/vehicles/[id] o similar. Ajusta la URL según tu API.
 const {
     data: currentVehicle,
     pending: loadingVehicle,
@@ -60,20 +59,24 @@ watch(
 
 // 3. Enviar los datos modificados mediante PUT
 const handleSubmit = async () => {
+    // 🛡️ GUARDIÁN ANTIDOBLE-ENVÍO: Frenamos en seco ejecuciones adicionales concurrentes
+    if (saving.value) return;
+
     saving.value = true;
     statusMessage.value = null;
 
     try {
         await $fetch(`/api/vehicle`, {
-            // Tu endpoint PUT que acepta el cuerpo de actualización
             method: "PUT",
             body: {
-                id: Number(vehicleId), // Le pasamos el ID obligatorio para el WHERE de Prisma
+                id: Number(vehicleId), // ID obligatorio para el WHERE de Prisma
                 model: form.value.model,
                 plate: form.value.plate,
-                km: form.value.km,
-                oil_km: form.value.oil_km,
-                next_oil_km: form.value.next_oil_km,
+                km: form.value.km ? Number(form.value.km) : null,
+                oil_km: form.value.oil_km ? Number(form.value.oil_km) : null,
+                next_oil_km: form.value.next_oil_km
+                    ? Number(form.value.next_oil_km)
+                    : null,
                 itv_date: form.value.itv_date || null,
                 next_itv_date: form.value.next_itv_date || null,
                 active: form.value.active,
@@ -97,9 +100,10 @@ const handleSubmit = async () => {
                 error.statusMessage ||
                 "No se pudo actualizar el vehículo. Revisa los datos.",
         };
-    } finally {
+        // ⚠️ Solo reactivamos los controles si ocurre un error para poder rectificar datos
         saving.value = false;
     }
+    // Omitimos intencionadamente el reset de saving en el flujo 'try' para evitar clics fantasma pre-redirección
 };
 </script>
 
@@ -117,7 +121,11 @@ const handleSubmit = async () => {
                     máquina.
                 </p>
             </div>
-            <NuxtLink to="/dash/vehicles" class="btn btn-ghost btn-sm gap-2">
+            <NuxtLink
+                to="/dash/vehicles"
+                class="btn btn-ghost btn-sm gap-2"
+                :class="{ 'btn-disabled': saving }"
+            >
                 <Icon name="lucide:arrow-left" class="w-4 h-4" />
                 Volver al listado
             </NuxtLink>
@@ -153,7 +161,7 @@ const handleSubmit = async () => {
                     class="alert shadow-sm"
                     :class="
                         statusMessage.type === 'success'
-                            ? 'alert-success text-success-content'
+                            ? 'alert-success text-success-content font-bold'
                             : 'alert-error text-error-content'
                     "
                 >
@@ -170,7 +178,7 @@ const handleSubmit = async () => {
 
                 <div>
                     <h2
-                        class="text-md font-semibold text-primary uppercase tracking-wider mb-3"
+                        class="text-xs font-bold text-primary uppercase tracking-wider mb-3"
                     >
                         Información Básica
                     </h2>
@@ -211,7 +219,7 @@ const handleSubmit = async () => {
 
                 <div>
                     <h2
-                        class="text-md font-semibold text-primary uppercase tracking-wider mb-3"
+                        class="text-xs font-bold text-primary uppercase tracking-wider mb-3"
                     >
                         Kilometrajes y Mantenimiento
                     </h2>
@@ -225,7 +233,7 @@ const handleSubmit = async () => {
                             <input
                                 v-model="form.km"
                                 type="number"
-                                class="input input-bordered w-full"
+                                class="input input-bordered w-full font-mono"
                                 min="0"
                                 required
                                 :disabled="saving"
@@ -241,7 +249,7 @@ const handleSubmit = async () => {
                             <input
                                 v-model="form.oil_km"
                                 type="number"
-                                class="input input-bordered w-full"
+                                class="input input-bordered w-full font-mono"
                                 min="0"
                                 :disabled="saving"
                             />
@@ -256,7 +264,7 @@ const handleSubmit = async () => {
                             <input
                                 v-model="form.next_oil_km"
                                 type="number"
-                                class="input input-bordered w-full"
+                                class="input input-bordered w-full font-mono"
                                 min="0"
                                 :disabled="saving"
                             />
@@ -268,7 +276,7 @@ const handleSubmit = async () => {
 
                 <div>
                     <h2
-                        class="text-md font-semibold text-primary uppercase tracking-wider mb-3"
+                        class="text-xs font-bold text-primary uppercase tracking-wider mb-3"
                     >
                         Inspección Técnica (ITV)
                     </h2>
@@ -306,22 +314,31 @@ const handleSubmit = async () => {
                 <div class="divider my-0"></div>
 
                 <div
-                    class="flex items-center justify-between bg-base-200 p-4 rounded-xl"
+                    class="flex items-center justify-between p-4 rounded-xl border transition-all duration-200"
+                    :class="
+                        form.active
+                            ? 'bg-success/10 border-success/30'
+                            : 'bg-base-200 border-base-300'
+                    "
                 >
                     <div>
-                        <h3 class="font-medium text-sm">Estado del Vehículo</h3>
-                        <p class="text-xs text-base-content/60">
+                        <h3 class="font-bold text-sm">Estado del Vehículo</h3>
+                        <p class="text-xs opacity-60">
                             Cambia el estado si la máquina entra en reparación o
                             parada técnica.
                         </p>
                     </div>
-                    <div class="form-control">
-                        <label class="label cursor-pointer gap-3">
-                            <span class="label-text font-medium">{{
-                                form.active
-                                    ? "Activo / Operativo"
-                                    : "Inactivo / Parado"
-                            }}</span>
+                    <div class="form-control shrink-0">
+                        <label class="label cursor-pointer gap-3 p-0">
+                            <span
+                                class="label-text font-bold text-xs uppercase tracking-wide"
+                            >
+                                {{
+                                    form.active
+                                        ? "Activo / Operativo"
+                                        : "Inactivo / Parado"
+                                }}
+                            </span>
                             <input
                                 v-model="form.active"
                                 type="checkbox"
@@ -333,13 +350,18 @@ const handleSubmit = async () => {
                 </div>
 
                 <div class="card-actions justify-end mt-4 gap-2">
-                    <NuxtLink to="/dash/vehicles" class="btn btn-ghost"
-                        >Cancelar</NuxtLink
+                    <NuxtLink
+                        to="/dash/vehicles"
+                        class="btn btn-ghost"
+                        :class="{ 'btn-disabled': saving }"
                     >
+                        Cancelar
+                    </NuxtLink>
                     <button
                         type="submit"
                         class="btn btn-primary px-8"
                         :disabled="saving"
+                        :class="{ 'btn-disabled': saving }"
                     >
                         <span
                             v-if="saving"
