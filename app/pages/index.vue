@@ -30,11 +30,16 @@ const handleLogin = async () => {
                 >
                     GESTION DE TALLER
                 </h2>
-                <h3
-                    class="card-title text-2xl font-bold justify-center mb-2 text-primary"
+                <h2
+                    class="card-title text-1xl font-bold justify-center mb-2 text-primary"
                 >
-                    v 0.0.3 en desarrollo
-                </h3>
+                    R.A. BENIDORM S.L.
+                </h2>
+                <h2
+                    class="card-title text-1xl font-bold justify-center mb-2 text-primary"
+                >
+                    v 0.0.4 en desarrollo
+                </h2>
                 <p class="text-sm text-base-content/70 text-center mb-4">
                     Introduce tus credenciales para acceder a la plataforma.
                 </p>

@@ -1,7 +1,7 @@
 {
   "name": "taller-v",
   "type": "module",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Sistema en tiempo real para el control de mantenimiento y partes de averías",
   "author": "franselles",
   "private": true,

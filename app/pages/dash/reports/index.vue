@@ -13,13 +13,13 @@ interface VehicleMin {
 
 interface Report {
     id: number;
-    date_report: string | null; // ISO String de MySQL
+    date_report: string | null;
     km: number | null;
     fault: string | null;
     repair: string | null;
     active: boolean;
     vehicle_id: number | null;
-    vehicle: VehicleMin | null; // Relación traída desde Prisma
+    vehicle: VehicleMin | null;
 }
 
 // 1. Obtener los informes usando useFetch nativo de Nuxt 4
@@ -34,12 +34,15 @@ const {
 const search = ref("");
 const filterState = ref("all"); // "all" | "open" | "resolved"
 
+// --- ESTADOS DE PAGINACIÓN ---
+const currentPage = ref(1);
+const itemsPerPage = ref(10); // Tamaño por defecto de la página
+
 // 2. Filtrado reactivo en tiempo real (Buscador global + Estado de avería)
 const filteredReports = computed(() => {
     if (!reports.value) return [];
 
     return reports.value.filter((r) => {
-        // Campos a evaluar con control de nulos de seguridad
         const faultText = r.fault || "";
         const repairText = r.repair || "";
         const vehicleModel = r.vehicle?.model || "";
@@ -60,7 +63,38 @@ const filteredReports = computed(() => {
     });
 });
 
-// Función para redirigir a la edición/gestión del parte de avería
+// --- LÓGICA DE PAGINACIÓN ---
+// Resetear a la página 1 de forma automática si el usuario cambia los filtros o escribe
+watch([search, filterState, itemsPerPage], () => {
+    currentPage.value = 1;
+});
+
+// Calcular el total de páginas en base a los datos filtrados
+const totalPages = computed(() => {
+    return Math.ceil(filteredReports.value.length / itemsPerPage.value) || 1;
+});
+
+// Segmentar los datos filtrados para mostrar solo los de la página actual
+const paginatedReports = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage.value;
+    const end = start + itemsPerPage.value;
+    return filteredReports.value.slice(start, end);
+});
+
+// Rangos de visualización para el texto informativo (ej: "Mostrando 1-10 de 45")
+const showingFrom = computed(() =>
+    filteredReports.value.length === 0
+        ? 0
+        : (currentPage.value - 1) * itemsPerPage.value + 1,
+);
+const showingTo = computed(() => {
+    const max = currentPage.value * itemsPerPage.value;
+    return max > filteredReports.value.length
+        ? filteredReports.value.length
+        : max;
+});
+
+// Redirigir a la edición/gestión del parte de avería
 const editReport = (id: number) => {
     navigateTo(`/dash/reports/edit/${id}`);
 };
@@ -78,7 +112,6 @@ const formatDate = (dateString: string | null) => {
 
 <template>
     <div class="space-y-6">
-        <!-- Encabezado Principal -->
         <div
             class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-base-300 pb-4"
         >
@@ -100,7 +133,6 @@ const formatDate = (dateString: string | null) => {
             </NuxtLink>
         </div>
 
-        <!-- Barra de Herramientas: Buscador y Filtros -->
         <div
             class="flex flex-col md:flex-row gap-3 bg-base-100 p-4 rounded-xl border border-base-300 shadow-sm"
         >
@@ -141,7 +173,6 @@ const formatDate = (dateString: string | null) => {
             </div>
         </div>
 
-        <!-- Alerta de Error si falla la conexión -->
         <div
             v-if="error"
             class="alert alert-error shadow-sm text-error-content"
@@ -153,7 +184,6 @@ const formatDate = (dateString: string | null) => {
             >
         </div>
 
-        <!-- Skeletons Animados mientras carga -->
         <div v-if="loading" class="space-y-3">
             <div class="h-12 bg-base-300 rounded-xl w-full animate-pulse"></div>
             <div
@@ -163,7 +193,6 @@ const formatDate = (dateString: string | null) => {
             ></div>
         </div>
 
-        <!-- Tabla de Informes -->
         <div
             v-else
             class="card bg-base-100 shadow-sm border border-base-300 overflow-hidden"
@@ -183,10 +212,9 @@ const formatDate = (dateString: string | null) => {
                     </thead>
 
                     <tbody>
-                        <!-- Estado vacío -->
-                        <tr v-if="filteredReports.length === 0">
+                        <tr v-if="paginatedReports.length === 0">
                             <td
-                                colspan="6"
+                                colspan="7"
                                 class="text-center py-12 text-base-content/50"
                             >
                                 <Icon
@@ -203,9 +231,8 @@ const formatDate = (dateString: string | null) => {
                             </td>
                         </tr>
 
-                        <!-- Iteración de Informes -->
                         <tr
-                            v-for="report in filteredReports"
+                            v-for="report in paginatedReports"
                             :key="report.id"
                             class="hover align-top"
                         >
@@ -214,7 +241,6 @@ const formatDate = (dateString: string | null) => {
                             >
                                 #{{ report.id }}
                             </td>
-                            <!-- Columna 1: Fecha e Identificación del coche -->
                             <td class="py-4">
                                 <div class="space-y-1">
                                     <div
@@ -247,7 +273,6 @@ const formatDate = (dateString: string | null) => {
                                 </div>
                             </td>
 
-                            <!-- Columna 2: Kilómetros en el momento del fallo -->
                             <td class="font-mono text-sm font-medium py-4">
                                 {{
                                     report.km
@@ -256,7 +281,6 @@ const formatDate = (dateString: string | null) => {
                                 }}
                             </td>
 
-                            <!-- Columna 3: El problema -->
                             <td class="py-4">
                                 <p
                                     class="text-sm font-medium line-clamp-2 text-base-content"
@@ -269,7 +293,6 @@ const formatDate = (dateString: string | null) => {
                                 </p>
                             </td>
 
-                            <!-- Columna 4: La reparación -->
                             <td class="py-4">
                                 <p
                                     v-if="report.repair"
@@ -290,7 +313,6 @@ const formatDate = (dateString: string | null) => {
                                 </span>
                             </td>
 
-                            <!-- Columna 5: Estado del parte -->
                             <td class="py-4">
                                 <span
                                     class="badge badge-sm font-semibold p-2"
@@ -308,7 +330,6 @@ const formatDate = (dateString: string | null) => {
                                 </span>
                             </td>
 
-                            <!-- Columna 6: Acciones -->
                             <td class="text-right py-4">
                                 <div class="flex justify-end gap-1">
                                     <button
@@ -326,6 +347,68 @@ const formatDate = (dateString: string | null) => {
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <div
+                v-if="filteredReports.length > 0"
+                class="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-base-300 bg-base-50/50"
+            >
+                <div
+                    class="text-xs text-base-content/60 text-center sm:text-left"
+                >
+                    Mostrando
+                    <span class="font-bold text-base-content">{{
+                        showingFrom
+                    }}</span>
+                    al
+                    <span class="font-bold text-base-content">{{
+                        showingTo
+                    }}</span>
+                    de
+                    <span class="font-bold text-base-content">{{
+                        filteredReports.length
+                    }}</span>
+                    partes.
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2 text-xs">
+                        <span class="text-base-content/60"
+                            >Filas por página:</span
+                        >
+                        <select
+                            v-model="itemsPerPage"
+                            class="select select-bordered select-xs font-medium"
+                        >
+                            <option :value="5">5</option>
+                            <option :value="10">10</option>
+                            <option :value="25">25</option>
+                            <option :value="50">50</option>
+                        </select>
+                    </div>
+
+                    <div class="join border border-base-300 shadow-xs">
+                        <button
+                            class="join-item btn btn-xs min-h-8 h-8 px-3"
+                            :disabled="currentPage === 1"
+                            @click="currentPage--"
+                        >
+                            Anterior
+                        </button>
+                        <button
+                            class="join-item btn btn-xs min-h-8 h-8 px-4 bg-base-200 pointer-events-none font-mono"
+                        >
+                            {{ currentPage }} / {{ totalPages }}
+                        </button>
+                        <button
+                            class="join-item btn btn-xs min-h-8 h-8 px-3"
+                            :disabled="currentPage === totalPages"
+                            @click="currentPage++"
+                        >
+                            Siguiente
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
