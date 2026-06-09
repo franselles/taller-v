@@ -4,7 +4,7 @@ export default eventHandler(async (event) => {
   try {
     const allReports = await prisma.reports.findMany({
       // Ordenamos para que los partes abiertos y más nuevos salgan arriba
-      orderBy: [{ active: "desc" }, { date_report: "desc" }],
+      orderBy: [{ active: "desc" }, { id: "asc" }],
       // ESTO ES CLAVE: Trae los datos de la tabla Vehicles en la misma consulta
       include: {
         vehicle: {
