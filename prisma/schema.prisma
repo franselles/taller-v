@@ -20,16 +20,19 @@ model Users {
 }
 
 model Vehicles {
-  id            Int       @id @default(autoincrement())
-  model         String?   @db.VarChar(300)
-  plate         String?   @db.VarChar(10)
-  km            Int?
-  itv_date      DateTime? @db.Date
-  next_itv_date DateTime? @db.Date
-  oil_km        Int?
-  next_oil_km   Int?
-  active        Boolean   @default(true)
-  reports       Reports[]
+  id              Int       @id @default(autoincrement())
+  model           String?   @db.VarChar(300)
+  plate           String?   @db.VarChar(10)
+  km              Int?
+  itv_date        DateTime? @db.Date
+  next_itv_date   DateTime? @db.Date
+  oil_km          Int?
+  next_oil_km     Int?
+  insurance       String?   @db.VarChar(300)
+  insurance_desc  String?   @db.Text
+  insurance_phone String?   @db.VarChar(20)
+  active          Boolean   @default(true)
+  reports         Reports[]
 }
 
 model Reports {

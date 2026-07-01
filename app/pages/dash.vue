@@ -134,6 +134,17 @@ const closeDrawer = () => {
                                 Averías
                             </NuxtLink>
                         </li>
+                        <li>
+                            <NuxtLink
+                                to="/dash/insurances"
+                                active-class="active"
+                                class="flex items-center gap-3"
+                                @click="closeDrawer"
+                            >
+                                <Icon name="lucide:wrench" class="w-5 h-5" />
+                                Seguros
+                            </NuxtLink>
+                        </li>
                     </ul>
                 </div>
 

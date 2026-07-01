@@ -8,7 +8,7 @@ definePageMeta({
 const route = useRoute();
 const vehicleId = route.params.id;
 
-// Estado del formulario
+// Estado del formulario (Incluyendo campos de seguros)
 const form = ref({
     model: "",
     plate: "",
@@ -17,6 +17,9 @@ const form = ref({
     next_oil_km: null as number | null,
     itv_date: "",
     next_itv_date: "",
+    insurance: "",
+    insurance_desc: "",
+    insurance_phone: "",
     active: true,
 });
 
@@ -50,6 +53,10 @@ watch(
                 next_itv_date: newData.next_itv_date
                     ? newData.next_itv_date.split("T")[0]
                     : "",
+                // Mapeo de la información de seguros
+                insurance: newData.insurance || "",
+                insurance_desc: newData.insurance_desc || "",
+                insurance_phone: newData.insurance_phone || "",
                 active: newData.active ?? true,
             };
         }
@@ -79,6 +86,10 @@ const handleSubmit = async () => {
                     : null,
                 itv_date: form.value.itv_date || null,
                 next_itv_date: form.value.next_itv_date || null,
+                // Nuevos campos de seguros procesados hacia la API
+                insurance: form.value.insurance || null,
+                insurance_desc: form.value.insurance_desc || null,
+                insurance_phone: form.value.insurance_phone || null,
                 active: form.value.active,
             },
         });
@@ -103,7 +114,6 @@ const handleSubmit = async () => {
         // ⚠️ Solo reactivamos los controles si ocurre un error para poder rectificar datos
         saving.value = false;
     }
-    // Omitimos intencionadamente el reset de saving en el flujo 'try' para evitar clics fantasma pre-redirección
 };
 </script>
 
@@ -117,8 +127,8 @@ const handleSubmit = async () => {
                     Editar Vehículo
                 </h1>
                 <p class="text-sm text-base-content/60">
-                    Modifica los detalles técnicos o el estado operativo de la
-                    máquina.
+                    Modifica los detalles técnicos, estado u opciones de seguro
+                    del vehículo.
                 </p>
             </div>
             <NuxtLink
@@ -184,11 +194,11 @@ const handleSubmit = async () => {
                     </h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="form-control w-full">
-                            <label class="label"
-                                ><span class="label-text font-medium"
+                            <label class="label">
+                                <span class="label-text font-medium"
                                     >Modelo / Descripción</span
-                                ></label
-                            >
+                                >
+                            </label>
                             <input
                                 v-model="form.model"
                                 type="text"
@@ -199,11 +209,11 @@ const handleSubmit = async () => {
                         </div>
 
                         <div class="form-control w-full">
-                            <label class="label"
-                                ><span class="label-text font-medium"
+                            <label class="label">
+                                <span class="label-text font-medium"
                                     >Matrícula / Identificador</span
-                                ></label
-                            >
+                                >
+                            </label>
                             <input
                                 v-model="form.plate"
                                 type="text"
@@ -225,11 +235,11 @@ const handleSubmit = async () => {
                     </h2>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="form-control w-full">
-                            <label class="label"
-                                ><span class="label-text font-medium"
+                            <label class="label">
+                                <span class="label-text font-medium"
                                     >Kilómetros Actuales</span
-                                ></label
-                            >
+                                >
+                            </label>
                             <input
                                 v-model="form.km"
                                 type="number"
@@ -241,11 +251,11 @@ const handleSubmit = async () => {
                         </div>
 
                         <div class="form-control w-full">
-                            <label class="label"
-                                ><span class="label-text font-medium"
+                            <label class="label">
+                                <span class="label-text font-medium"
                                     >Km Último Aceite</span
-                                ></label
-                            >
+                                >
+                            </label>
                             <input
                                 v-model="form.oil_km"
                                 type="number"
@@ -256,11 +266,11 @@ const handleSubmit = async () => {
                         </div>
 
                         <div class="form-control w-full">
-                            <label class="label"
-                                ><span class="label-text font-medium"
+                            <label class="label">
+                                <span class="label-text font-medium"
                                     >Km Próximo Aceite</span
-                                ></label
-                            >
+                                >
+                            </label>
                             <input
                                 v-model="form.next_oil_km"
                                 type="number"
@@ -282,11 +292,11 @@ const handleSubmit = async () => {
                     </h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="form-control w-full">
-                            <label class="label"
-                                ><span class="label-text font-medium"
+                            <label class="label">
+                                <span class="label-text font-medium"
                                     >Fecha Última ITV</span
-                                ></label
-                            >
+                                >
+                            </label>
                             <input
                                 v-model="form.itv_date"
                                 type="date"
@@ -296,11 +306,11 @@ const handleSubmit = async () => {
                         </div>
 
                         <div class="form-control w-full">
-                            <label class="label"
-                                ><span class="label-text font-medium"
+                            <label class="label">
+                                <span class="label-text font-medium"
                                     >Fecha Próxima ITV</span
-                                ></label
-                            >
+                                >
+                            </label>
                             <input
                                 v-model="form.next_itv_date"
                                 type="date"
@@ -308,6 +318,61 @@ const handleSubmit = async () => {
                                 :disabled="saving"
                             />
                         </div>
+                    </div>
+                </div>
+
+                <div class="divider my-0"></div>
+
+                <div>
+                    <h2
+                        class="text-xs font-bold text-primary uppercase tracking-wider mb-3"
+                    >
+                        Póliza de Seguro
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-medium"
+                                    >Compañía Aseguradora</span
+                                >
+                            </label>
+                            <input
+                                v-model="form.insurance"
+                                type="text"
+                                placeholder="Ej: Mapfre, Allianz..."
+                                class="input input-bordered w-full"
+                                :disabled="saving"
+                            />
+                        </div>
+
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-medium"
+                                    >Teléfono de Asistencia</span
+                                >
+                            </label>
+                            <input
+                                v-model="form.insurance_phone"
+                                type="tel"
+                                placeholder="Ej: 900XXXXXX"
+                                class="input input-bordered w-full font-mono"
+                                :disabled="saving"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text font-medium"
+                                >Detalles de Cobertura / Notas del Seguro</span
+                            >
+                        </label>
+                        <textarea
+                            v-model="form.insurance_desc"
+                            placeholder="Introduce detalles sobre franquicias, número de póliza o coberturas especiales..."
+                            class="textarea textarea-bordered h-24 w-full leading-relaxed"
+                            :disabled="saving"
+                        ></textarea>
                     </div>
                 </div>
 
@@ -361,7 +426,6 @@ const handleSubmit = async () => {
                         type="submit"
                         class="btn btn-primary px-8"
                         :disabled="saving"
-                        :class="{ 'btn-disabled': saving }"
                     >
                         <span
                             v-if="saving"

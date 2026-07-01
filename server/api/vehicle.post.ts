@@ -13,6 +13,9 @@ export default eventHandler(async (event) => {
         next_itv_date: new Date(response.next_itv_date) || null,
         oil_km: Number(response.oil_km) || 0,
         next_oil_km: Number(response.next_oil_km) || 0,
+        insurance: response.insurance?.toUpperCase() || "",
+        insurance_desc: response.insurance_desc?.toUpperCase() || "",
+        insurance_phone: response.insurance_phone?.toUpperCase() || "",
         active: Boolean(response.active) || false,
       },
     });

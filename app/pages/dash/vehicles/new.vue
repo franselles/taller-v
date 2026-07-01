@@ -4,7 +4,7 @@ definePageMeta({
     layout: "dash", // Asegúrate de que tu archivo de layout en layouts/ se llame dash.vue
 });
 
-// Estado del formulario mapeado exactamente a tu endpoint
+// Estado del formulario mapeado exactamente a tu endpoint (incluyendo campos de seguro)
 const form = ref({
     model: "",
     plate: "",
@@ -13,6 +13,9 @@ const form = ref({
     next_oil_km: null as number | null,
     itv_date: "",
     next_itv_date: "",
+    insurance: "",
+    insurance_desc: "",
+    insurance_phone: "",
     active: true,
 });
 
@@ -42,6 +45,10 @@ const handleSubmit = async () => {
                 next_oil_km: form.value.next_oil_km
                     ? Number(form.value.next_oil_km)
                     : null,
+                // 👇 Campos de seguro mapeados de forma segura
+                insurance: form.value.insurance || null,
+                insurance_desc: form.value.insurance_desc || null,
+                insurance_phone: form.value.insurance_phone || null,
                 active: form.value.active,
             },
         });
@@ -60,6 +67,9 @@ const handleSubmit = async () => {
             next_oil_km: null,
             itv_date: "",
             next_itv_date: "",
+            insurance: "",
+            insurance_desc: "",
+            insurance_phone: "",
             active: true,
         };
 
@@ -78,8 +88,6 @@ const handleSubmit = async () => {
         // ⚠️ Solo reactivamos los controles si la petición falla, para permitir correcciones
         loading.value = false;
     }
-    // Nota: Omitimos de forma intencionada 'loading.value = false' en el flujo exitoso.
-    // Al mantenerlo congelado, el usuario no puede alterar nada ni provocar clics fantasma durante la redirección.
 };
 </script>
 
@@ -269,6 +277,66 @@ const handleSubmit = async () => {
 
                 <div class="divider my-0"></div>
 
+                <div>
+                    <h2
+                        class="text-xs font-bold text-primary uppercase tracking-wider mb-3"
+                    >
+                        Póliza de Seguro
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div class="form-control w-full">
+                            <label class="label"
+                                ><span class="label-text font-medium"
+                                    >Compañía / Tipo de Seguro</span
+                                ></label
+                            >
+                            <input
+                                v-model="form.insurance"
+                                type="text"
+                                placeholder="Ej: Mapfre Todo Riesgo, Allianz..."
+                                class="input input-bordered w-full"
+                                :disabled="loading"
+                            />
+                        </div>
+
+                        <div class="form-control w-full">
+                            <label class="label"
+                                ><span class="label-text font-medium"
+                                    >Teléfono de Asistencia</span
+                                ></label
+                            >
+                            <div class="relative">
+                                <Icon
+                                    name="lucide:phone"
+                                    class="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 w-4 h-4"
+                                />
+                                <input
+                                    v-model="form.insurance_phone"
+                                    type="tel"
+                                    placeholder="Ej: 900XXXXXX"
+                                    class="input input-bordered w-full pl-10 font-mono"
+                                    :disabled="loading"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-control w-full">
+                        <label class="label"
+                            ><span class="label-text font-medium"
+                                >Detalles o Coberturas de la Póliza</span
+                            ></label
+                        >
+                        <textarea
+                            v-model="form.insurance_desc"
+                            placeholder="Introduce número de póliza, cláusulas importantes o notas de asistencia en carretera..."
+                            class="textarea textarea-bordered w-full h-24 resize-none"
+                            :disabled="loading"
+                        ></textarea>
+                    </div>
+                </div>
+
+                <div class="divider my-0"></div>
+
                 <div
                     class="flex items-center justify-between p-4 rounded-xl border transition-all duration-200"
                     :class="
@@ -313,7 +381,6 @@ const handleSubmit = async () => {
                         type="submit"
                         class="btn btn-primary px-8"
                         :disabled="loading"
-                        :class="{ 'btn-disabled': loading }"
                     >
                         <span
                             v-if="loading"
