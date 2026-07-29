@@ -1,7 +1,7 @@
 {
   "name": "taller-v",
   "type": "module",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Sistema en tiempo real para el control de mantenimiento y partes de averías",
   "author": "franselles",
   "private": true,
@@ -18,7 +18,7 @@
     "@prisma/client": "^7.8.0",
     "@tailwindcss/vite": "^4.3.0",
     "daisyui": "^5.5.20",
-    "nuxt": "^4.4.5",
+    "nuxt": "^4.5.1",
     "tailwindcss": "^4.3.0",
     "vue": "^3.5.33",
     "vue-router": "^5.0.6"
